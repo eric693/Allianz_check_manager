@@ -877,43 +877,45 @@
                     <div class="feature-box">
                         <h3 class="text-lg font-semibold mb-2">
                             <span data-i18n="SALARY_LEGAL_DEDUCTIONS_TITLE">法定扣款項目</span>
-                            <span class="auto-badge ml-2" data-i18n="AUTO_CALCULATE">✨ 自動計算</span>
+                            <!-- ❌ 移除自動計算標記 -->
                         </h3>
                         <p class="text-sm text-gray-400 mb-4" data-i18n="LEGAL_DEDUCTIONS_DESC">
-                            輸入基本薪資後，系統會根據台灣勞動法規自動計算以下項目
+                            請手動輸入或點擊「計算扣款」按鈕自動計算以下項目
                         </p>
                         
+                        <!-- ⭐ 新增：手動計算按鈕 -->
+                        <button type="button" class="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors" onclick="manualCalculateDeductions()">
+                            計算扣款
+                        </button>
+                        
                         <div class="form-grid">
-                            <!-- 勞保費（自動計算） -->
+                            <!-- 勞保費（改為可輸入） -->
                             <div class="form-group">
                                 <label class="form-label">
-                                    <span data-i18n="SALARY_LABOR_INS_LABEL">勞保費</span> 
-                                    <span class="auto-badge" data-i18n="AUTO">自動</span>
+                                    <span data-i18n="SALARY_LABOR_INS_LABEL">勞保費</span>
                                 </label>
                                 <input type="number" id="config-labor-fee" class="form-input" 
-                                       value="0" readonly style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+                                       value="0" min="0" step="1" placeholder="0">
                                 <span class="form-hint" data-i18n="HINT_LABOR_INS">個人負擔20%</span>
                             </div>
                             
-                            <!-- 健保費（自動計算） -->
+                            <!-- 健保費（改為可輸入） -->
                             <div class="form-group">
                                 <label class="form-label">
-                                    <span data-i18n="SALARY_HEALTH_INS_LABEL">健保費</span> 
-                                    <span class="auto-badge" data-i18n="AUTO">自動</span>
+                                    <span data-i18n="SALARY_HEALTH_INS_LABEL">健保費</span>
                                 </label>
                                 <input type="number" id="config-health-fee" class="form-input" 
-                                       value="0" readonly style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+                                       value="0" min="0" step="1" placeholder="0">
                                 <span class="form-hint" data-i18n="HINT_HEALTH_INS">個人負擔30%</span>
                             </div>
                             
-                            <!-- 就業保險費（自動計算） -->
+                            <!-- 就業保險費（改為可輸入） -->
                             <div class="form-group">
                                 <label class="form-label">
-                                    <span data-i18n="SALARY_EMPLOYMENT_INS_LABEL">就業保險費</span> 
-                                    <span class="auto-badge" data-i18n="AUTO">自動</span>
+                                    <span data-i18n="SALARY_EMPLOYMENT_INS_LABEL">就業保險費</span>
                                 </label>
                                 <input type="number" id="config-employment-fee" class="form-input" 
-                                       value="0" readonly style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+                                       value="0" min="0" step="1" placeholder="0">
                                 <span class="form-hint" data-i18n="HINT_EMPLOYMENT_INS">費率1%</span>
                             </div>
                             
@@ -925,24 +927,22 @@
                                 <span class="form-hint" data-i18n="HINT_PENSION_RATE">可選擇 0% ~ 6%</span>
                             </div>
                             
-                            <!-- 勞退自提金額（自動計算） -->
+                            <!-- 勞退自提金額（改為可輸入） -->
                             <div class="form-group">
                                 <label class="form-label">
-                                    <span data-i18n="SALARY_PENSION_SELF_LABEL">勞退自提金額</span> 
-                                    <span class="auto-badge" data-i18n="AUTO">自動</span>
+                                    <span data-i18n="SALARY_PENSION_SELF_LABEL">勞退自提金額</span>
                                 </label>
                                 <input type="number" id="config-pension-self" class="form-input" 
-                                       value="0" readonly style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+                                       value="0" min="0" step="1" placeholder="0">
                             </div>
                             
-                            <!-- 所得稅（自動計算） -->
+                            <!-- 所得稅（改為可輸入） -->
                             <div class="form-group">
                                 <label class="form-label">
-                                    <span data-i18n="SALARY_TAX_LABEL">所得稅</span> 
-                                    <span class="auto-badge" data-i18n="AUTO">自動</span>
+                                    <span data-i18n="SALARY_TAX_LABEL">所得稅</span>
                                 </label>
                                 <input type="number" id="config-income-tax" class="form-input" 
-                                       value="0" readonly style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+                                       value="0" min="0" step="1" placeholder="0">
                             </div>
                         </div>
                     
@@ -1341,7 +1341,7 @@
                 initSalaryTab();
             }
             
-            bindAutoCalculation();
+            // bindAutoCalculation();
             bindHourlyCalculation();
         });
 
@@ -2107,6 +2107,100 @@
                 console.error('載入現有薪資設定失敗:', error);
             }
         }
+
+        // ⭐ 新增：手動計算扣款函數
+        function manualCalculateDeductions() {
+            const baseSalary = parseFloat(document.getElementById('config-base-salary').value) || 0;
+            const pensionRate = parseFloat(document.getElementById('config-pension-rate').value) || 0;
+            
+            if (baseSalary <= 0) {
+                showNotification('請先輸入基本薪資', 'warning');
+                return;
+            }
+            
+            // 取得投保薪資級距
+            const insuredSalary = getInsuredSalary(baseSalary);
+            
+            // 計算法定扣款
+            const laborFee = Math.round(insuredSalary * 0.115 * 0.2);
+            const healthFee = Math.round(insuredSalary * 0.0517 * 0.3);
+            const employmentFee = Math.round(insuredSalary * 0.01 * 0.2);
+            const pensionSelf = Math.round(insuredSalary * (pensionRate / 100));
+            
+            // 計算所得稅
+            let incomeTax = 0;
+            if (baseSalary > 34000) {
+                incomeTax = Math.round((baseSalary - 34000) * 0.05);
+            }
+            
+            // 更新欄位
+            document.getElementById('config-labor-fee').value = laborFee;
+            document.getElementById('config-health-fee').value = healthFee;
+            document.getElementById('config-employment-fee').value = employmentFee;
+            document.getElementById('config-pension-self').value = pensionSelf;
+            document.getElementById('config-income-tax').value = incomeTax;
+            
+            // 更新試算預覽
+            updateSalaryPreview();
+            
+            showNotification('✅ 扣款已計算完成', 'success');
+        }
+
+        // ⭐ 新增：更新薪資試算預覽
+        function updateSalaryPreview() {
+            const baseSalary = parseFloat(document.getElementById('config-base-salary').value) || 0;
+            
+            // 津貼
+            const positionAllowance = parseFloat(document.getElementById('config-position-allowance').value) || 0;
+            const mealAllowance = parseFloat(document.getElementById('config-meal-allowance').value) || 0;
+            const transportAllowance = parseFloat(document.getElementById('config-transport-allowance').value) || 0;
+            const attendanceBonus = parseFloat(document.getElementById('config-attendance-bonus').value) || 0;
+            const performanceBonus = parseFloat(document.getElementById('config-performance-bonus').value) || 0;
+            const otherAllowances = parseFloat(document.getElementById('config-other-allowances').value) || 0;
+            
+            // 法定扣款
+            const laborFee = parseFloat(document.getElementById('config-labor-fee').value) || 0;
+            const healthFee = parseFloat(document.getElementById('config-health-fee').value) || 0;
+            const employmentFee = parseFloat(document.getElementById('config-employment-fee').value) || 0;
+            const pensionSelf = parseFloat(document.getElementById('config-pension-self').value) || 0;
+            const incomeTax = parseFloat(document.getElementById('config-income-tax').value) || 0;
+            
+            // 其他扣款
+            const welfareFee = parseFloat(document.getElementById('config-welfare-fee').value) || 0;
+            const dormitoryFee = parseFloat(document.getElementById('config-dormitory-fee').value) || 0;
+            const groupInsurance = parseFloat(document.getElementById('config-group-insurance').value) || 0;
+            const otherDeductions = parseFloat(document.getElementById('config-other-deductions').value) || 0;
+            
+            // 計算總額
+            const allowancesTotal = positionAllowance + mealAllowance + transportAllowance + 
+                                attendanceBonus + performanceBonus + otherAllowances;
+            const legalDeductions = laborFee + healthFee + employmentFee + pensionSelf + incomeTax;
+            const otherDeductionsTotal = welfareFee + dormitoryFee + groupInsurance + otherDeductions;
+            const netSalary = baseSalary + allowancesTotal - legalDeductions - otherDeductionsTotal;
+            
+            // 其他資訊
+            const insuredSalary = getInsuredSalary(baseSalary);
+            const hourlyRate = Math.round(baseSalary / 30 / 8);
+            
+            // 更新顯示
+            const previewEls = {
+                'preview-base-salary': baseSalary,
+                'preview-allowances-total': allowancesTotal,
+                'preview-insured-salary': insuredSalary,
+                'preview-hourly-rate': hourlyRate,
+                'preview-legal-deductions': legalDeductions,
+                'preview-other-deductions-total': otherDeductionsTotal,
+                'preview-net-salary': netSalary
+            };
+            
+            Object.entries(previewEls).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = `NT$ ${value.toLocaleString('zh-TW')}`;
+                }
+            });
+        }
+
         /**
          * ⭐ 月薪計算 - 員工選擇變更事件
          */
