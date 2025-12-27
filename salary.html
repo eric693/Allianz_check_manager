@@ -1932,9 +1932,65 @@
         /**
          * ⭐ 載入員工列表到所有下拉選單
          */
-        async function loadEmployeeList() {
+        // async function loadEmployeeList() {
+        //     try {
+        //         console.log('📋 載入員工列表...');
+                
+        //         const res = await callApifetch('getAllUsers');
+                
+        //         if (res.ok && res.users && res.users.length > 0) {
+        //             // 所有需要員工下拉選單的元素ID
+        //             const selectIds = [
+        //                 'config-employee-select',
+        //                 'calc-employee-select',
+        //                 'hourly-employee-select'
+        //             ];
+                    
+        //             selectIds.forEach(selectId => {
+        //                 const selectEl = document.getElementById(selectId);
+        //                 if (!selectEl) {
+        //                     console.warn(`找不到 ${selectId}`);
+        //                     return;
+        //                 }
+                        
+        //                 // 清空並重建選項
+        //                 selectEl.innerHTML = '<option value="">請選擇員工</option>';
+                        
+        //                 res.users.forEach(user => {
+        //                     const option = document.createElement('option');
+        //                     option.value = JSON.stringify({
+        //                         userId: user.userId,
+        //                         name: user.name,
+        //                         email: user.email,
+        //                         dept: user.dept
+        //                     });
+        //                     option.textContent = `${user.name} (${user.dept || '未分配部門'})`;
+        //                     selectEl.appendChild(option);
+        //                 });
+        //             });
+                
+        //             console.log(`✅ 成功載入 ${res.users.length} 位員工到所有下拉選單`);
+        //         } else {
+        //             // 所有下拉選單顯示無可用員工
+        //             ['config-employee-select', 'calc-employee-select', 'hourly-employee-select'].forEach(id => {
+        //                 const el = document.getElementById(id);
+        //                 if (el) el.innerHTML = '<option value="">無可用員工</option>';
+        //             });
+        //             console.warn('沒有員工資料或載入失敗');
+        //         }
+                
+        //     } catch (error) {
+        //         console.error('❌ 載入員工列表失敗:', error);
+        //         ['config-employee-select', 'calc-employee-select', 'hourly-employee-select'].forEach(id => {
+        //             const el = document.getElementById(id);
+        //             if (el) el.innerHTML = '<option value="">載入失敗</option>';
+        //         });
+        //     }
+        // }
+        
+        async function loadEmployeeList(retryCount = 0) {
             try {
-                console.log('📋 載入員工列表...');
+                console.log(`📋 載入員工列表... (嘗試 ${retryCount + 1})`);
                 
                 const res = await callApifetch('getAllUsers');
                 
@@ -1946,10 +2002,13 @@
                         'hourly-employee-select'
                     ];
                     
+                    let hasError = false;
+                    
                     selectIds.forEach(selectId => {
                         const selectEl = document.getElementById(selectId);
                         if (!selectEl) {
                             console.warn(`找不到 ${selectId}`);
+                            hasError = true;
                             return;
                         }
                         
@@ -1967,27 +2026,44 @@
                             option.textContent = `${user.name} (${user.dept || '未分配部門'})`;
                             selectEl.appendChild(option);
                         });
+                        
+                        // ⭐ 驗證選項是否正確添加
+                        console.log(`✅ ${selectId} 已添加 ${selectEl.options.length - 1} 位員工`);
                     });
-                
+                    
+                    // ⭐ 如果有錯誤且重試次數未超過3次，則重試
+                    if (hasError && retryCount < 3) {
+                        console.warn('⚠️ 部分元素未找到，500ms 後重試...');
+                        setTimeout(() => loadEmployeeList(retryCount + 1), 500);
+                        return;
+                    }
+                    
                     console.log(`✅ 成功載入 ${res.users.length} 位員工到所有下拉選單`);
                 } else {
-                    // 所有下拉選單顯示無可用員工
-                    ['config-employee-select', 'calc-employee-select', 'hourly-employee-select'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) el.innerHTML = '<option value="">無可用員工</option>';
-                    });
-                    console.warn('沒有員工資料或載入失敗');
+                    throw new Error('API 回應無效或無員工資料');
                 }
                 
             } catch (error) {
                 console.error('❌ 載入員工列表失敗:', error);
-                ['config-employee-select', 'calc-employee-select', 'hourly-employee-select'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.innerHTML = '<option value="">載入失敗</option>';
+                console.error('錯誤詳情:', {
+                    message: error.message,
+                    stack: error.stack,
+                    retryCount
                 });
+                
+                // ⭐ 如果重試次數未超過3次，則重試
+                if (retryCount < 3) {
+                    console.warn(`⚠️ 1秒後重試... (第 ${retryCount + 1} 次)`);
+                    setTimeout(() => loadEmployeeList(retryCount + 1), 1000);
+                } else {
+                    // 所有下拉選單顯示載入失敗
+                    ['config-employee-select', 'calc-employee-select', 'hourly-employee-select'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.innerHTML = '<option value="">載入失敗，請重新整理頁面</option>';
+                    });
+                }
             }
         }
-
         /**
          * ⭐ 員工選擇變更事件
          */
