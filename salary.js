@@ -1489,10 +1489,10 @@ function displayOvertimeFromCalculation(data) {
             <p class="text-3xl font-bold text-orange-200">${totalOvertimeHours}h</p>
         </div>
         
-        <!-- ⭐⭐⭐ 修正：垂直排列，只顯示有值的項目 -->
+        <!-- ⭐⭐⭐ 關鍵修正：使用 space-y-2 垂直排列 -->
         <div class="space-y-2 mb-3">
             ${weekdayOvertimePay > 0 ? `
-                <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg border border-blue-300 dark:border-blue-700">
                     <div class="flex justify-between items-center">
                         <div>
                             <span class="font-semibold text-blue-800 dark:text-blue-300">平日加班</span>
@@ -1505,7 +1505,7 @@ function displayOvertimeFromCalculation(data) {
             ` : ''}
             
             ${restdayOvertimePay > 0 ? `
-                <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg border border-purple-300 dark:border-purple-700">
                     <div class="flex justify-between items-center">
                         <div>
                             <span class="font-semibold text-purple-800 dark:text-purple-300">休息日加班</span>
@@ -1518,7 +1518,7 @@ function displayOvertimeFromCalculation(data) {
             ` : ''}
             
             ${holidayOvertimePay > 0 ? `
-                <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg border border-red-300 dark:border-red-700">
                     <div class="flex justify-between items-center">
                         <div>
                             <span class="font-semibold text-red-800 dark:text-red-300">例假日加班</span>
