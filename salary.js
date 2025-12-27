@@ -1485,28 +1485,48 @@ function displayOvertimeFromCalculation(data) {
         </div>
         
         <!-- 分類明細 -->
-        <div class="grid grid-cols-3 gap-3 mb-3">
-            <div class="text-center p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg">
-                <p class="text-xs text-blue-300 mb-1">平日加班費</p>
-                <p class="text-lg font-bold text-blue-200">${formatCurrency(weekdayOvertimePay)}</p>
-                <p class="text-xs text-blue-400 mt-1">(前2h ×1.34, 後2h ×1.67)</p>
+        ${weekdayOvertimePay > 0 || restdayOvertimePay > 0 || holidayOvertimePay > 0 ? `
+            <div class="space-y-2 mb-3">
+                ${weekdayOvertimePay > 0 ? `
+                    <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold text-blue-800 dark:text-blue-300">平日加班</span>
+                                <span class="text-xs text-blue-600 dark:text-blue-400 ml-2">（週一～五）</span>
+                            </div>
+                            <span class="text-lg font-bold text-blue-800 dark:text-blue-200">${formatCurrency(weekdayOvertimePay)}</span>
+                        </div>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">前2h ×1.34 | 第3h起 ×1.67</p>
+                    </div>
+                ` : ''}
+                
+                ${restdayOvertimePay > 0 ? `
+                    <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold text-purple-800 dark:text-purple-300">休息日加班</span>
+                                <span class="text-xs text-purple-600 dark:text-purple-400 ml-2">（週六）</span>
+                            </div>
+                            <span class="text-lg font-bold text-purple-800 dark:text-purple-200">${formatCurrency(restdayOvertimePay)}</span>
+                        </div>
+                        <p class="text-xs text-purple-600 dark:text-purple-400 mt-1">前2h ×1.34 | 3-8h ×1.67 | 9h起 ×2.67</p>
+                    </div>
+                ` : ''}
+                
+                ${holidayOvertimePay > 0 ? `
+                    <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold text-red-800 dark:text-red-300">例假日加班</span>
+                                <span class="text-xs text-red-600 dark:text-red-400 ml-2">（週日）×2.0</span>
+                            </div>
+                            <span class="text-lg font-bold text-red-800 dark:text-red-200">${formatCurrency(holidayOvertimePay)}</span>
+                        </div>
+                    </div>
+                ` : ''}
             </div>
-            
-            ${restdayOvertimePay > 0 ? `
-                <div class="text-center p-3 bg-purple-900/20 border border-purple-700/30 rounded-lg">
-                    <p class="text-xs text-purple-300 mb-1">休息日加班費</p>
-                    <p class="text-lg font-bold text-purple-200">${formatCurrency(restdayOvertimePay)}</p>
-                    <p class="text-xs text-purple-400 mt-1">(週六 ×1.34~2.67)</p>
-                </div>
-            ` : ''}
-            
-            <div class="text-center p-3 bg-red-900/20 border border-red-700/30 rounded-lg">
-                <p class="text-xs text-red-300 mb-1">假日加班費</p>
-                <p class="text-lg font-bold text-red-200">${formatCurrency(holidayOvertimePay)}</p>
-                <p class="text-xs text-red-400 mt-1">(週日 ×2.0)</p>
-            </div>
-        </div>
-        
+        ` : ''}
+       
         <!-- 每日明細 -->
         ${holidayOvertimePay > 0 ? `
             <div class="p-3 bg-red-900/10 border border-red-700/20 rounded-lg mb-3">
