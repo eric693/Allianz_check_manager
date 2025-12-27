@@ -216,12 +216,32 @@ async function loadDailyOvertimeDetails(yearMonth) {
 async function loadOvertimeRecordsCard(yearMonth, salaryData) {
     console.log('📊 載入加班記錄卡片');
     
-    // ⭐ 修正：正確讀取三種加班費
-    const totalOvertimeHours = parseFloat(salaryData['總加班時數']) || 0;
-    const weekdayOvertimePay = parseFloat(salaryData['平日加班費']) || 0;
-    const restdayOvertimePay = parseFloat(salaryData['休息日加班費']) || 0;    // ⭐ 新增
-    const holidayOvertimePay = parseFloat(salaryData['國定假日加班費']) || 0;  // ⭐ 修正變數名
-    const totalOvertimePay = weekdayOvertimePay + restdayOvertimePay + holidayOvertimePay;  // ⭐ 修正
+    // ⭐⭐⭐ 修正：兼容兩種格式（camelCase 和中文欄位）
+    const totalOvertimeHours = parseFloat(
+        salaryData.totalOvertimeHours !== undefined 
+            ? salaryData.totalOvertimeHours 
+            : salaryData['總加班時數']
+    ) || 0;
+    
+    const weekdayOvertimePay = parseFloat(
+        salaryData.weekdayOvertimePay !== undefined 
+            ? salaryData.weekdayOvertimePay 
+            : salaryData['平日加班費']
+    ) || 0;
+    
+    const restdayOvertimePay = parseFloat(
+        salaryData.restdayOvertimePay !== undefined 
+            ? salaryData.restdayOvertimePay 
+            : salaryData['休息日加班費']
+    ) || 0;
+    
+    const holidayOvertimePay = parseFloat(
+        salaryData.holidayOvertimePay !== undefined 
+            ? salaryData.holidayOvertimePay 
+            : salaryData['國定假日加班費']
+    ) || 0;
+    
+    const totalOvertimePay = weekdayOvertimePay + restdayOvertimePay + holidayOvertimePay;
     
     console.log(`⏰ 總加班: ${totalOvertimeHours}h`);
     console.log(`   平日: $${weekdayOvertimePay}`);
