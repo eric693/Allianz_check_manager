@@ -35,7 +35,7 @@ function getEmployeeSalarySheet() {
       "員工ID", "員工姓名", "身分證字號", "員工類型", "薪資類型", "基本薪資",
       
       // 固定津貼項目 (6欄: G-L)
-      "職務加給", "伙食費", "交通補助", "全勤獎金", "績效獎金", "其他津貼",
+      "職務加給", "伙食費", "交通補助", "全勤獎金", "業績獎金", "其他津貼",
       
       // 銀行資訊 (4欄: M-P)
       "銀行代碼", "銀行帳號", "到職日期", "發薪日",
@@ -92,7 +92,7 @@ function getMonthlySalarySheetEnhanced() {
       "薪資類型", "時薪", "工作時數", "總加班時數", // ⭐ 新增
       
       // 應發項目
-      "基本薪資", "職務加給", "伙食費", "交通補助", "全勤獎金", "績效獎金", "其他津貼",
+      "基本薪資", "職務加給", "伙食費", "交通補助", "全勤獎金", "業績獎金", "其他津貼",
       "平日加班費", "休息日加班費", "國定假日加班費",
       
       // 法定扣款
@@ -167,7 +167,7 @@ function setEmployeeSalaryTW(salaryData) {
       parseFloat(salaryData.mealAllowance) || 0,         // H: 伙食費
       parseFloat(salaryData.transportAllowance) || 0,    // I: 交通補助
       parseFloat(salaryData.attendanceBonus) || 0,       // J: 全勤獎金
-      parseFloat(salaryData.performanceBonus) || 0,      // K: 績效獎金
+      parseFloat(salaryData.performanceBonus) || 0,      // K: 業績獎金
       parseFloat(salaryData.otherAllowances) || 0,       // L: 其他津貼
       
       // M-P: 銀行資訊 (4欄)
@@ -286,7 +286,7 @@ function syncSalaryToMonthlyRecord(employeeId, yearMonth) {
         (parseFloat(config['伙食費']) || 0) +
         (parseFloat(config['交通補助']) || 0) +
         (parseFloat(config['全勤獎金']) || 0) +
-        (parseFloat(config['績效獎金']) || 0) +
+        (parseFloat(config['業績獎金']) || 0) +
         (parseFloat(config['其他津貼']) || 0);
       
       const totalDeductions = 
@@ -320,7 +320,7 @@ function syncSalaryToMonthlyRecord(employeeId, yearMonth) {
         mealAllowance: config['伙食費'] || 0,
         transportAllowance: config['交通補助'] || 0,
         attendanceBonus: config['全勤獎金'] || 0,
-        performanceBonus: config['績效獎金'] || 0,
+        performanceBonus: config['業績獎金'] || 0,
         otherAllowances: config['其他津貼'] || 0,
         weekdayOvertimePay: 0,
         restdayOvertimePay: 0,
@@ -927,7 +927,7 @@ function calculateHourlySalary(employeeId, yearMonth) {
     const mealAllowance = parseFloat(config['伙食費']) || 0;
     const transportAllowance = parseFloat(config['交通補助']) || 0;
     const attendanceBonus = parseFloat(config['全勤獎金']) || 0;
-    const performanceBonus = parseFloat(config['績效獎金']) || 0;
+    const performanceBonus = parseFloat(config['業績獎金']) || 0;
     const otherAllowances = parseFloat(config['其他津貼']) || 0;
     
     Logger.log(`📋 固定津貼:`);
@@ -935,7 +935,7 @@ function calculateHourlySalary(employeeId, yearMonth) {
     if (mealAllowance > 0) Logger.log(`   - 伙食費: $${mealAllowance}`);
     if (transportAllowance > 0) Logger.log(`   - 交通補助: $${transportAllowance}`);
     if (attendanceBonus > 0) Logger.log(`   - 全勤獎金: $${attendanceBonus}`);
-    if (performanceBonus > 0) Logger.log(`   - 績效獎金: $${performanceBonus}`);
+    if (performanceBonus > 0) Logger.log(`   - 業績獎金: $${performanceBonus}`);
     if (otherAllowances > 0) Logger.log(`   - 其他津貼: $${otherAllowances}`);
     
     // 8. 應發總額
@@ -1454,7 +1454,7 @@ function calculateMonthlySalaryInternal(employeeId, yearMonth) {
     const mealAllowance = parseFloat(config['伙食費']) || 0;
     const transportAllowance = parseFloat(config['交通補助']) || 0;
     let attendanceBonus = parseFloat(config['全勤獎金']) || 0;
-    const performanceBonus = parseFloat(config['績效獎金']) || 0;
+    const performanceBonus = parseFloat(config['業績獎金']) || 0;
     const otherAllowances = parseFloat(config['其他津貼']) || 0;
     
     // 6. ⭐⭐⭐ 計算加班費（整合版）

@@ -552,7 +552,7 @@ function handleSetEmployeeSalaryTW(params) {
       mealAllowance: parseFloat(params.mealAllowance) || 0,              // H: 伙食費
       transportAllowance: parseFloat(params.transportAllowance) || 0,    // I: 交通補助
       attendanceBonus: parseFloat(params.attendanceBonus) || 0,          // J: 全勤獎金
-      performanceBonus: parseFloat(params.performanceBonus) || 0,        // K: 績效獎金
+      performanceBonus: parseFloat(params.performanceBonus) || 0,        // K: 業績獎金
       otherAllowances: parseFloat(params.otherAllowances) || 0,          // L: 其他津貼
       
       // ========== 銀行資訊 (4 個參數: M-P) ==========
@@ -585,7 +585,7 @@ function handleSetEmployeeSalaryTW(params) {
     Logger.log('   - 伙食費: ' + salaryData.mealAllowance);
     Logger.log('   - 交通補助: ' + salaryData.transportAllowance);
     Logger.log('   - 全勤獎金: ' + salaryData.attendanceBonus);
-    Logger.log('   - 績效獎金: ' + salaryData.performanceBonus);
+    Logger.log('   - 業績獎金: ' + salaryData.performanceBonus);
     Logger.log('   - 其他津貼: ' + salaryData.otherAllowances);
     Logger.log('   - 福利金: ' + salaryData.welfareFee);
     Logger.log('   - 宿舍費用: ' + salaryData.dormitoryFee);

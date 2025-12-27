@@ -565,7 +565,7 @@ function displayEmployeeSalary(data) {
     safeSet('detail-meal-allowance', formatCurrency(data['伙食費'] || 0));
     safeSet('detail-transport-allowance', formatCurrency(data['交通補助'] || 0));
     safeSet('detail-attendance-bonus', formatCurrency(data['全勤獎金'] || 0));
-    safeSet('detail-performance-bonus', formatCurrency(data['績效獎金'] || 0));
+    safeSet('detail-performance-bonus', formatCurrency(data['業績獎金'] || 0));
     // safeSet('detail-weekday-overtime', formatCurrency(data['平日加班費']));
     // safeSet('detail-restday-overtime', formatCurrency(data['休息日加班費']));
     // safeSet('detail-holiday-overtime', formatCurrency(data['國定假日加班費']));
@@ -1096,7 +1096,7 @@ function displaySalaryCalculation(data, container) {
                         <span class="font-mono">${formatCurrency(data.attendanceBonus || 0)}</span>
                     </div>
                     <div class="calculation-row">
-                        <span>績效獎金</span>
+                        <span>業績獎金</span>
                         <span class="font-mono">${formatCurrency(data.performanceBonus || 0)}</span>
                     </div>
                     ${weekdayOvertimePay > 0 ? `

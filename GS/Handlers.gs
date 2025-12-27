@@ -975,7 +975,7 @@ function handleSetEmployeeSalaryTW(params) {
     Logger.log('   伙食費: ' + salaryData.mealAllowance);
     Logger.log('   交通補助: ' + salaryData.transportAllowance);
     Logger.log('   全勤獎金: ' + salaryData.attendanceBonus);
-    Logger.log('   績效獎金: ' + salaryData.performanceBonus);
+    Logger.log('   業績獎金: ' + salaryData.performanceBonus);
     Logger.log('   其他津貼: ' + salaryData.otherAllowances);
     Logger.log('   銀行代碼: ' + salaryData.bankCode);
     Logger.log('   銀行帳號: ' + salaryData.bankAccount);
