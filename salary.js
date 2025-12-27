@@ -546,10 +546,30 @@ function displayEmployeeSalary(data) {
     safeSet('detail-transport-allowance', formatCurrency(data['交通補助'] || 0));
     safeSet('detail-attendance-bonus', formatCurrency(data['全勤獎金'] || 0));
     safeSet('detail-performance-bonus', formatCurrency(data['績效獎金'] || 0));
-    safeSet('detail-weekday-overtime', formatCurrency(data['平日加班費']));
-    safeSet('detail-restday-overtime', formatCurrency(data['休息日加班費']));
-    safeSet('detail-holiday-overtime', formatCurrency(data['國定假日加班費']));
+    // safeSet('detail-weekday-overtime', formatCurrency(data['平日加班費']));
+    // safeSet('detail-restday-overtime', formatCurrency(data['休息日加班費']));
+    // safeSet('detail-holiday-overtime', formatCurrency(data['國定假日加班費']));
+    // ⭐⭐⭐ 修正：兼容兩種格式（camelCase 和中文欄位）
+    const weekdayPay = data.weekdayOvertimePay !== undefined 
+        ? data.weekdayOvertimePay 
+        : (data['平日加班費'] || 0);
     
+    const restdayPay = data.restdayOvertimePay !== undefined 
+        ? data.restdayOvertimePay 
+        : (data['休息日加班費'] || 0);
+    
+    const holidayPay = data.holidayOvertimePay !== undefined 
+        ? data.holidayOvertimePay 
+        : (data['國定假日加班費'] || 0);
+    
+    console.log('🔍 加班費讀取檢查:');
+    console.log('   平日:', weekdayPay);
+    console.log('   休息日:', restdayPay);
+    console.log('   例假日:', holidayPay);
+
+    safeSet('detail-weekday-overtime', formatCurrency(weekdayPay));
+    safeSet('detail-restday-overtime', formatCurrency(restdayPay));
+    safeSet('detail-holiday-overtime', formatCurrency(holidayPay));
     // 扣款項目
     safeSet('detail-labor-fee', formatCurrency(data['勞保費']));
     safeSet('detail-health-fee', formatCurrency(data['健保費']));
