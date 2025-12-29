@@ -310,13 +310,9 @@ function quickSelectTimeRange(type) {
     updateWorkHoursPreview();
 }
 
-/**
- * 提交請假申請
- */
 async function submitLeaveApplication() {
     console.log('📤 開始提交請假申請');
     
-    // 驗證表單
     if (!validateLeaveForm()) {
         console.error('❌ 表單驗證失敗');
         return;
@@ -328,13 +324,43 @@ async function submitLeaveApplication() {
     const reason = document.getElementById('leave-reason').value;
     const workHours = calculateWorkHours(startTime, endTime);
     
+    // ⭐⭐⭐ 新增：計算請假天數
+    const days = workHours / 8;
+    
     console.log('📋 提交資料:', {
         leaveType,
         startTime,
         endTime,
         workHours,
+        days,
         reason
     });
+    
+    // ⭐⭐⭐ 新增：檢查假期餘額
+    try {
+        const balanceRes = await callApifetch('getLeaveBalance');
+        
+        if (balanceRes.ok && balanceRes.balance) {
+            const availableDays = balanceRes.balance[leaveType] || 0;
+            
+            console.log(`💰 假期餘額檢查:`, {
+                假別: leaveType,
+                可用天數: availableDays,
+                申請天數: days
+            });
+            
+            if (days > availableDays) {
+                showNotification(
+                    `餘額不足！${t(leaveType)} 剩餘 ${availableDays * 8} 小時（${availableDays} 天），但您申請了 ${workHours} 小時（${days} 天）`,
+                    'error'
+                );
+                return;
+            }
+        }
+    } catch (error) {
+        console.error('❌ 檢查餘額失敗:', error);
+        // 繼續提交（不阻擋）
+    }
     
     const button = document.getElementById('submit-leave-btn');
     if (button) {
@@ -364,7 +390,6 @@ async function submitLeaveApplication() {
             const previewEl = document.getElementById('work-hours-preview');
             if (previewEl) previewEl.classList.add('hidden');
             
-            // ✅ 使用 await 確保資料重新載入完成
             console.log('🔄 重新載入假期餘額...');
             await loadLeaveBalance();
             
@@ -385,7 +410,6 @@ async function submitLeaveApplication() {
         }
     }
 }
-
 /**
  * 驗證請假表單
  */
