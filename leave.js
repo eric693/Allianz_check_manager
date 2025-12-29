@@ -747,9 +747,6 @@ async function loadPendingLeaveRequests() {
     }
 }
 
-/**
- * 渲染待審核請假列表
- */
 function renderPendingLeaveRequests(requests) {
     const listEl = document.getElementById('pending-leave-list');
     if (!listEl) return;
@@ -760,7 +757,6 @@ function renderPendingLeaveRequests(requests) {
         const li = document.createElement('li');
         li.className = 'p-4 bg-gray-50 dark:bg-gray-700 rounded-lg';
         
-        // ✅ 使用 formatDateTime 格式化時間顯示
         const timeDisplay = req.startDateTime && req.endDateTime
             ? `${formatDateTime(req.startDateTime)} ~ ${formatDateTime(req.endDateTime)}`
             : req.startDate && req.endDate
@@ -772,6 +768,13 @@ function renderPendingLeaveRequests(requests) {
             : req.days
             ? `${req.days} 天`
             : '時數未知';
+        
+        // ⭐⭐⭐ 新增：顯示餘額警告
+        const balanceWarning = req.insufficientBalance 
+            ? `<p class="text-xs text-red-600 dark:text-red-400 mt-2 font-semibold">
+                   ⚠️ 該員工餘額不足（剩餘 ${req.remainingBalance} 天）
+               </p>`
+            : '';
         
         li.innerHTML = `
             <div class="flex flex-col space-y-2">
@@ -791,6 +794,7 @@ function renderPendingLeaveRequests(requests) {
                                 原因：${req.reason}
                             </p>
                         ` : ''}
+                        ${balanceWarning}
                     </div>
                 </div>
                 
