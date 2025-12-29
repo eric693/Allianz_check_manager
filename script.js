@@ -3886,6 +3886,12 @@ function renderUsersList(users) {
                 <!-- 操作按鈕 -->
                 ${!isCurrentUser ? `
                     <div class="flex flex-wrap gap-2">
+                        <!-- 新增：編輯姓名按鈕 -->
+                        <button onclick="openEditNameDialog('${user.userId}', '${user.name}')"
+                                class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-md transition-colors">
+                            ✏️ 編輯姓名
+                        </button>
+                        
                         ${isAdmin ? `
                             <button onclick="changeUserRole('${user.userId}', '${user.name}', 'employee')"
                                     class="flex-1 min-w-[120px] px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-md transition-colors">
@@ -3906,6 +3912,7 @@ function renderUsersList(users) {
                 ` : `
                     <span class="text-xs text-gray-500 dark:text-gray-400">無法操作自己</span>
                 `}
+
             </div>
         </div>
         `;
