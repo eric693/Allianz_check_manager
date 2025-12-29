@@ -4027,3 +4027,138 @@ async function deleteUser(userId, userName) {
         showNotification('刪除失敗，請稍後再試', 'error');
     }
 }
+
+// ==================== 編輯員工姓名功能 ====================
+
+/**
+ * 打開編輯姓名對話框
+ */
+function openEditNameDialog(userId, currentName) {
+    const dialog = document.createElement('div');
+    dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    dialog.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                ✏️ 編輯員工姓名
+            </h3>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    目前姓名
+                </label>
+                <input type="text" 
+                       value="${currentName}" 
+                       disabled
+                       class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 text-gray-500 dark:text-gray-400">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    新姓名 <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       id="new-name-input"
+                       placeholder="請輸入新姓名（至少 2 個字）"
+                       maxlength="50"
+                       class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    ℹ️ 修改後將立即生效
+                </p>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button onclick="closeEditNameDialog()"
+                        class="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-semibold transition-colors">
+                    取消
+                </button>
+                <button onclick="saveNewName('${userId}')"
+                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
+                    確認修改
+                </button>
+            </div>
+        </div>
+    `;
+    
+    dialog.id = 'edit-name-dialog';
+    document.body.appendChild(dialog);
+    
+    // 自動聚焦輸入框
+    setTimeout(() => {
+        document.getElementById('new-name-input').focus();
+    }, 100);
+    
+    // 按 Enter 提交
+    document.getElementById('new-name-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            saveNewName(userId);
+        }
+    });
+    
+    // 點擊背景關閉
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            closeEditNameDialog();
+        }
+    });
+}
+
+/**
+ * 關閉編輯姓名對話框
+ */
+function closeEditNameDialog() {
+    const dialog = document.getElementById('edit-name-dialog');
+    if (dialog) {
+        dialog.remove();
+    }
+}
+
+/**
+ * 儲存新姓名
+ */
+async function saveNewName(userId) {
+    const input = document.getElementById('new-name-input');
+    const newName = input.value.trim();
+    
+    // 驗證
+    if (!newName) {
+        showNotification('請輸入新姓名', 'error');
+        input.focus();
+        return;
+    }
+    
+    if (newName.length < 2) {
+        showNotification('姓名至少需要 2 個字', 'error');
+        input.focus();
+        return;
+    }
+    
+    if (newName.length > 50) {
+        showNotification('姓名不能超過 50 個字', 'error');
+        input.focus();
+        return;
+    }
+    
+    try {
+        showNotification('更新中...', 'info');
+        
+        const res = await callApifetch(
+            `updateEmployeeName&userId=${encodeURIComponent(userId)}&newName=${encodeURIComponent(newName)}`
+        );
+        
+        if (res.ok) {
+            showNotification(`✅ 姓名已更新為「${res.newName}」`, 'success');
+            
+            // 關閉對話框
+            closeEditNameDialog();
+            
+            // 重新載入用戶列表
+            await loadAllUsers();
+        } else {
+            showNotification(res.msg || '更新失敗', 'error');
+        }
+        
+    } catch (error) {
+        console.error('更新姓名失敗:', error);
+        showNotification('更新失敗，請稍後再試', 'error');
+    }
+}
