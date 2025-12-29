@@ -923,48 +923,20 @@ async function renderCalendar(date) {
 }
 
 /**
- * ✅ 更新本月出勤統計（修正版 - 使用專門的工時 API）
+ * ✅ 更新本月出勤統計（已移除總工時）
  */
 async function updateMonthlyStats(records) {
-    const totalHoursEl = document.getElementById('stats-total-hours-value');
     const workDaysEl = document.getElementById('stats-work-days-value');
     const abnormalCountEl = document.getElementById('stats-abnormal-count-value');
     const normalDaysEl = document.getElementById('stats-normal-days-value');
     const overtimeHoursEl = document.getElementById('stats-overtime-hours-value');
     
-    if (!totalHoursEl || !workDaysEl || !abnormalCountEl || !normalDaysEl) {
+    if (!workDaysEl || !abnormalCountEl || !normalDaysEl) {
         console.warn('找不到統計元素');
         return;
     }
     
-    // ⭐⭐⭐ 關鍵修改：調用專門的工時 API
-    const userId = localStorage.getItem('sessionUserId');
-    const year = currentMonthDate.getFullYear();
-    const month = String(currentMonthDate.getMonth() + 1).padStart(2, '0');
-    const yearMonth = `${year}-${month}`;
-    
-    try {
-        // 📡 呼叫新的工時 API
-        const res = await callApifetch(
-            `getEmployeeWorkHours&yearMonth=${yearMonth}`
-        );
-        
-        if (res.ok && res.data) {
-            const totalWorkHours = parseFloat(res.data.totalWorkHours) || 0;
-            totalHoursEl.textContent = totalWorkHours.toFixed(1);
-            
-            console.log('✅ 使用工時 API:', totalWorkHours.toFixed(1), '小時');
-        } else {
-            console.warn('⚠️ 工時 API 失敗，使用前端計算');
-            calculateFrontendWorkHours(records, totalHoursEl);
-        }
-        
-    } catch (error) {
-        console.error('❌ 調用工時 API 失敗:', error);
-        calculateFrontendWorkHours(records, totalHoursEl);
-    }
-    
-    // ⭐ 其他統計數據仍然使用前端計算
+    // ⭐ 統計數據全部使用前端計算
     let workDays = 0;
     let abnormalCount = 0;
     let normalDays = 0;
@@ -1043,37 +1015,6 @@ async function updateMonthlyStats(records) {
     }
 }
 
-/**
- * 降級方案：前端計算工時（當 API 失敗時使用）
- */
-function calculateFrontendWorkHours(records, totalHoursEl) {
-    let totalHours = 0;
-    
-    records.forEach(record => {
-        const punchIn = record.record ? record.record.find(r => r.type === '上班') : null;
-        const punchOut = record.record ? record.record.find(r => r.type === '下班') : null;
-        
-        if (punchIn && punchOut) {
-            try {
-                const inTime = new Date(`${record.date} ${punchIn.time}`);
-                const outTime = new Date(`${record.date} ${punchOut.time}`);
-                const diffMs = outTime - inTime;
-                const totalHoursRaw = diffMs / (1000 * 60 * 60);
-                
-                if (totalHoursRaw > 0) {
-                    const lunchBreak = 1;
-                    const netHours = totalHoursRaw - lunchBreak;
-                    totalHours += netHours;
-                }
-            } catch (e) {
-                console.error('計算工時失敗:', e);
-            }
-        }
-    });
-    
-    totalHoursEl.textContent = totalHours > 0 ? totalHours.toFixed(1) : '0';
-    console.log('⚠️ 使用前端降級計算:', totalHours.toFixed(1), '小時');
-}
 /**
  * ✅ 更新本月出勤統計（改用後端計算 - 統一數據源）
  */
