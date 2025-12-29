@@ -505,19 +505,6 @@ function handleRejectReview(params) {
 
 // ==================== 加班功能相關 ====================
 
-function handleSubmitOvertime(params) {
-  const { token, overtimeDate, startTime, endTime, hours, reason } = params;
-  Logger.log(`收到加班申請: 日期=${overtimeDate}, 開始=${startTime}, 結束=${endTime}, 時數=${hours}`);
-  return submitOvertimeRequest(
-    token, 
-    overtimeDate, 
-    startTime, 
-    endTime, 
-    parseFloat(hours), 
-    reason
-  );
-}
-
 function handleGetEmployeeOvertime(params) {
   Logger.log(`查詢員工加班記錄`);
   return getEmployeeOvertimeRequests(params.token);

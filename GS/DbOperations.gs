@@ -6,13 +6,8 @@
  * 修正：僅 admin_list 內的 userId 才是管理員，其餘為員工
  */
 const ADMIN_LIST = [
-  "U68e0ca9d516e63ed15bf9387fad174ac",
-  "U1558097f933b72938d3098c201c28955",
-  "Ueb6337faee9c9f0afd381e039571fe37",
-  "Ueea1089924b92d3de5218f10331e685d",
-  "U0443d2af11a744a8d64c8914f300e72a",
-  "Ua5e653690ff1cc19f16bc67f159a48e5",
-  "U8e096120c5ec8cc25ef063f021369976"
+  "Ud3b574f260f5a777337158ccd4ff0ba2",
+  "U1558097f933b72938d3098c201c28955"
 ];
 
 function writeEmployee_(profile) {
@@ -2629,4 +2624,99 @@ function getEmployeeMonthlyPunchData(employeeId, yearMonth) {
       message: error.message
     };
   }
+}
+
+/**
+ * ✅ 更新員工姓名
+ */
+function updateEmployeeName(userId, newName) {
+  try {
+    Logger.log('✏️ 開始更新員工姓名');
+    Logger.log('   userId: ' + userId);
+    Logger.log('   newName: ' + newName);
+    
+    // 驗證輸入
+    if (!userId || !newName) {
+      return {
+        ok: false,
+        msg: '缺少必要參數'
+      };
+    }
+    
+    const trimmedName = String(newName).trim();
+    
+    if (trimmedName.length < 2) {
+      return {
+        ok: false,
+        msg: '姓名至少需要 2 個字'
+      };
+    }
+    
+    if (trimmedName.length > 50) {
+      return {
+        ok: false,
+        msg: '姓名不能超過 50 個字'
+      };
+    }
+    
+    const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_EMPLOYEES);
+    
+    if (!sheet) {
+      return {
+        ok: false,
+        msg: '找不到員工工作表'
+      };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    
+    // 尋找用戶並更新
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === userId) {  // A 欄: userId
+        const oldName = data[i][2];  // C 欄: displayName
+        
+        sheet.getRange(i + 1, 3).setValue(trimmedName);  // 更新姓名
+        
+        Logger.log('✅ 已更新姓名');
+        Logger.log('   舊姓名: ' + oldName);
+        Logger.log('   新姓名: ' + trimmedName);
+        
+        return {
+          ok: true,
+          msg: '姓名已更新',
+          oldName: oldName,
+          newName: trimmedName
+        };
+      }
+    }
+    
+    return {
+      ok: false,
+      msg: '找不到該員工'
+    };
+    
+  } catch (error) {
+    Logger.log('❌ updateEmployeeName 錯誤: ' + error);
+    return {
+      ok: false,
+      msg: error.message
+    };
+  }
+}
+
+/**
+ * 🧪 測試更新姓名
+ */
+function testUpdateEmployeeName() {
+  Logger.log('🧪 測試更新員工姓名');
+  Logger.log('');
+  
+  // ⚠️ 替換成實際的 userId
+  const testUserId = 'Ud3b574f260f5a777337158ccd4ff0ba2';
+  const newName = '王小明';
+  
+  const result = updateEmployeeName(testUserId, newName);
+  
+  Logger.log('📤 結果:');
+  Logger.log(JSON.stringify(result, null, 2));
 }
