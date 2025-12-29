@@ -1410,52 +1410,48 @@ async function loadAttendanceDetails(yearMonth) {
     }
 }
 
-/**
- * ✅ 從薪資計算結果顯示工作時數（只顯示統計，不顯示明細）
- */
 function displayWorkHoursFromCalculation(data) {
     const detailsSection = document.getElementById('attendance-details-section');
     if (!detailsSection) return;
     
-    // 移除舊的工時卡片
     const oldCard = document.getElementById('work-hours-card');
     if (oldCard) oldCard.remove();
     
-    // 建立新的工時卡片
     const workHoursCard = document.createElement('div');
     workHoursCard.id = 'work-hours-card';
     workHoursCard.className = 'feature-box bg-purple-900/20 border-purple-700 mb-4';
     
-    const totalWorkHours = Math.floor(data.totalWorkHours || 0);
+    // ⭐⭐⭐ 修正：保留小數位數
+    const totalWorkHours = parseFloat(data.totalWorkHours || 0).toFixed(1);
     const hourlyRate = data.hourlyRate || 0;
     const baseSalary = data.baseSalary || 0;
     
     workHoursCard.innerHTML = `
-        <h4 class="font-semibold mb-3 text-purple-400">本月工作時數統計</h4>
-        
-        <div class="grid grid-cols-3 gap-4 mb-4">
-            <div class="text-center p-3 bg-purple-800/20 rounded-lg">
-                <p class="text-sm text-purple-300 mb-1">時薪</p>
-                <p class="text-2xl font-bold text-purple-200">$${hourlyRate}</p>
-            </div>
-            <div class="text-center p-3 bg-purple-800/20 rounded-lg">
-                <p class="text-sm text-purple-300 mb-1">總工作時數</p>
-                <p class="text-2xl font-bold text-purple-200">${totalWorkHours}h</p>
-            </div>
-            <div class="text-center p-3 bg-purple-800/20 rounded-lg">
-                <p class="text-sm text-purple-300 mb-1">基本薪資</p>
-                <p class="text-2xl font-bold text-purple-200">${formatCurrency(baseSalary)}</p>
-                <p class="text-xs text-purple-400 mt-1">(時薪 × 工時)</p>
-            </div>
+      <h4 class="font-semibold mb-3 text-purple-400">本月工作時數統計</h4>
+      
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div class="text-center p-3 bg-purple-800/20 rounded-lg">
+          <p class="text-sm text-purple-300 mb-1">時薪</p>
+          <p class="text-2xl font-bold text-purple-200">$${hourlyRate}</p>
         </div>
-        
-        <div class="p-3 bg-purple-800/10 rounded-lg text-sm text-purple-300">
-            💡 工作時數已包含在薪資計算中
+        <div class="text-center p-3 bg-purple-800/20 rounded-lg">
+          <p class="text-sm text-purple-300 mb-1">總工作時數</p>
+          <p class="text-2xl font-bold text-purple-200">${totalWorkHours}h</p>
         </div>
+        <div class="text-center p-3 bg-purple-800/20 rounded-lg">
+          <p class="text-sm text-purple-300 mb-1">基本薪資</p>
+          <p class="text-2xl font-bold text-purple-200">${formatCurrency(baseSalary)}</p>
+          <p class="text-xs text-purple-400 mt-1">(時薪 × 工時)</p>
+        </div>
+      </div>
+      
+      <div class="p-3 bg-purple-800/10 rounded-lg text-sm text-purple-300">
+        💡 工作時數已包含在薪資計算中
+      </div>
     `;
     
     detailsSection.insertBefore(workHoursCard, detailsSection.firstChild);
-}
+  }
 
 
 function displayOvertimeFromCalculation(data) {
@@ -1815,3 +1811,30 @@ console.log('✅ 薪資匯出功能已載入（管理員專用）');
 
 console.log('✅ 薪資管理系統（完整版 v2.0）JS 已載入');
 console.log('📋 包含：基本薪資 + 6項津貼 + 10項扣款');
+
+/**
+ * ✅ 呼叫 API：取得員工總工作時數
+ * 
+ * @param {string} yearMonth - 年月 (YYYY-MM)
+ * @returns {Promise<Object>} { ok, totalWorkHours, workDays, records }
+ */
+async function getEmployeeWorkHours(yearMonth) {
+    try {
+      console.log(`📡 呼叫 API: getEmployeeWorkHours, 年月: ${yearMonth}`);
+      
+      const res = await callApifetch(`getEmployeeWorkHours&yearMonth=${encodeURIComponent(yearMonth)}`);
+      
+      if (res.ok && res.data) {
+        console.log(`✅ 總工作時數: ${res.data.totalWorkHours}h`);
+        console.log(`📊 工作天數: ${res.data.workDays} 天`);
+        return res;
+      } else {
+        console.error('❌ 取得工作時數失敗:', res.msg);
+        return { ok: false, msg: res.msg };
+      }
+      
+    } catch (error) {
+      console.error('❌ 呼叫 API 失敗:', error);
+      return { ok: false, msg: error.toString() };
+    }
+  }
