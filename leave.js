@@ -510,6 +510,20 @@ function validateLeaveForm() {
         return false;
     }
     
+    // ⭐⭐⭐ 新增：檢查是否為整點時間
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    
+    if (start.getMinutes() !== 0 || start.getSeconds() !== 0) {
+        showNotification('開始時間必須是整點（例如：09:00, 10:00）', 'error');
+        return false;
+    }
+    
+    if (end.getMinutes() !== 0 || end.getSeconds() !== 0) {
+        showNotification('結束時間必須是整點（例如：09:00, 10:00）', 'error');
+        return false;
+    }
+    
     if (!reason.trim() || reason.trim().length < 2) {
         showNotification('請填寫請假原因（至少2個字）', 'error');
         return false;
@@ -527,10 +541,12 @@ function validateLeaveForm() {
         return false;
     }
     
-    const start = new Date(startTime);
-    const end = new Date(endTime);
+    // ⭐ 修正：使用已創建的 start 和 end 變數
+    const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    const isSameDay = startDate.getTime() === endDate.getTime();
     
-    if (start.toDateString() === end.toDateString() && workHours > 8) {
+    if (isSameDay && workHours > 8) {
         showNotification('單日請假不能超過 8 小時（已扣除午休）', 'error');
         return false;
     }
