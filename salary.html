@@ -1977,67 +1977,6 @@
             
             return banks[code] || `未知銀行 (代碼: ${code})`;
         }
-        /**
-         * ⭐ 載入員工列表到下拉選單
-         */
-        /**
-         * ⭐ 載入員工列表到所有下拉選單
-         */
-        // async function loadEmployeeList() {
-        //     try {
-        //         console.log('📋 載入員工列表...');
-                
-        //         const res = await callApifetch('getAllUsers');
-                
-        //         if (res.ok && res.users && res.users.length > 0) {
-        //             // 所有需要員工下拉選單的元素ID
-        //             const selectIds = [
-        //                 'config-employee-select',
-        //                 'calc-employee-select',
-        //                 'hourly-employee-select'
-        //             ];
-                    
-        //             selectIds.forEach(selectId => {
-        //                 const selectEl = document.getElementById(selectId);
-        //                 if (!selectEl) {
-        //                     console.warn(`找不到 ${selectId}`);
-        //                     return;
-        //                 }
-                        
-        //                 // 清空並重建選項
-        //                 selectEl.innerHTML = '<option value="">請選擇員工</option>';
-                        
-        //                 res.users.forEach(user => {
-        //                     const option = document.createElement('option');
-        //                     option.value = JSON.stringify({
-        //                         userId: user.userId,
-        //                         name: user.name,
-        //                         email: user.email,
-        //                         dept: user.dept
-        //                     });
-        //                     option.textContent = `${user.name} (${user.dept || '未分配部門'})`;
-        //                     selectEl.appendChild(option);
-        //                 });
-        //             });
-                
-        //             console.log(`✅ 成功載入 ${res.users.length} 位員工到所有下拉選單`);
-        //         } else {
-        //             // 所有下拉選單顯示無可用員工
-        //             ['config-employee-select', 'calc-employee-select', 'hourly-employee-select'].forEach(id => {
-        //                 const el = document.getElementById(id);
-        //                 if (el) el.innerHTML = '<option value="">無可用員工</option>';
-        //             });
-        //             console.warn('沒有員工資料或載入失敗');
-        //         }
-                
-        //     } catch (error) {
-        //         console.error('❌ 載入員工列表失敗:', error);
-        //         ['config-employee-select', 'calc-employee-select', 'hourly-employee-select'].forEach(id => {
-        //             const el = document.getElementById(id);
-        //             if (el) el.innerHTML = '<option value="">載入失敗</option>';
-        //         });
-        //     }
-        // }
         
         async function loadEmployeeList(retryCount = 0) {
             try {
