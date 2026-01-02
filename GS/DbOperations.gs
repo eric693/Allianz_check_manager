@@ -2720,3 +2720,115 @@ function testUpdateEmployeeName() {
   Logger.log('📤 結果:');
   Logger.log(JSON.stringify(result, null, 2));
 }
+
+/**
+ * 根據 token 取得使用者資料
+ */
+function getUserByToken(token) {
+  try {
+    const session = checkSession_(token);
+    if (session.ok && session.user) {
+      return session.user;
+    }
+    return null;
+  } catch (error) {
+    Logger.log('❌ getUserByToken 錯誤: ' + error);
+    return null;
+  }
+}
+
+
+/**
+ * 🧪 測試公告系統（改良版）
+ */
+function testAnnouncementSystemImproved() {
+  Logger.log('═══════════════════════════════════════');
+  Logger.log('🧪 測試公告系統（改良版）');
+  Logger.log('═══════════════════════════════════════');
+  Logger.log('');
+  
+  const testToken = 'f8eeb016-b89a-4cb5-8737-8c904ca680ab';  // ⚠️ 替換成你的 token
+  
+  // ✅ 測試 1：新增公告
+  Logger.log('📝 測試 1：新增公告');
+  const addResult = handleAddAnnouncement({
+    token: testToken,
+    title: '測試公告 - ' + new Date().getTime(),
+    content: '這是一個測試公告',
+    priority: 'normal'
+  });
+  
+  Logger.log('   ok: ' + addResult.ok);
+  
+  if (!addResult.ok) {
+    Logger.log('❌ 新增失敗: ' + addResult.msg);
+    Logger.log('═══════════════════════════════════════');
+    return;
+  }
+  
+  const announcementId = addResult.announcement.id;
+  Logger.log('   ✅ 新增成功');
+  Logger.log('   ID: ' + announcementId);
+  Logger.log('   ID 型別: ' + typeof announcementId);
+  Logger.log('');
+  
+  // ✅ 測試 2：取得公告
+  Logger.log('📋 測試 2：取得公告');
+  const getResult = handleGetAnnouncements({});
+  
+  Logger.log('   ok: ' + getResult.ok);
+  Logger.log('   公告數: ' + (getResult.announcements ? getResult.announcements.length : 0));
+  
+  if (getResult.ok && getResult.announcements.length > 0) {
+    const latest = getResult.announcements[0];
+    Logger.log('   最新公告:');
+    Logger.log('     - ID: ' + latest.id + ' (' + typeof latest.id + ')');
+    Logger.log('     - 標題: ' + latest.title);
+  }
+  Logger.log('');
+  
+  // ⏸️ 等待 2 秒（確保資料已寫入）
+  Logger.log('⏸️ 等待 2 秒...');
+  Utilities.sleep(2000);
+  Logger.log('');
+  
+  // ✅ 測試 3：刪除公告
+  Logger.log('🗑️ 測試 3：刪除公告');
+  Logger.log('   準備刪除的 ID: ' + announcementId + ' (' + typeof announcementId + ')');
+  
+  const deleteResult = handleDeleteAnnouncement({
+    token: testToken,
+    id: announcementId
+  });
+  
+  Logger.log('');
+  Logger.log('   ok: ' + deleteResult.ok);
+  Logger.log('   msg: ' + deleteResult.msg);
+  Logger.log('');
+  
+  if (deleteResult.ok) {
+    Logger.log('✅✅✅ 刪除成功！');
+    
+    // ✅ 測試 4：確認刪除
+    Logger.log('');
+    Logger.log('🔍 測試 4：確認刪除');
+    const finalCheck = handleGetAnnouncements({});
+    
+    if (finalCheck.ok) {
+      const stillExists = finalCheck.announcements.some(a => String(a.id) === String(announcementId));
+      
+      if (stillExists) {
+        Logger.log('   ❌ 公告仍存在（刪除失敗）');
+      } else {
+        Logger.log('   ✅ 公告已不存在（刪除成功）');
+      }
+    }
+  } else {
+    Logger.log('❌ 刪除失敗: ' + deleteResult.msg);
+  }
+  
+  Logger.log('');
+  Logger.log('═══════════════════════════════════════');
+  Logger.log('🎉 測試完成！');
+  Logger.log('═══════════════════════════════════════');
+}

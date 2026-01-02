@@ -267,6 +267,13 @@ function doGet(e) {
       // 在 doGet(e) 的 switch 區塊中新增：
       case "getEmployeeMonthlyPunchData":
         return respond1(handleGetEmployeeMonthlyPunchData(e.parameter));
+      
+      case "getAnnouncements":
+        return respond1(handleGetAnnouncements(e.parameter));
+      case "addAnnouncement":
+        return respond1(handleAddAnnouncement(e.parameter));
+      case "deleteAnnouncement":
+        return respond1(handleDeleteAnnouncement(e.parameter));
       // ==================== 測試端點 ====================
       case "initApp":
         return respond1(handleInitApp(e.parameter));

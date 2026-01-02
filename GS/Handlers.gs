@@ -2319,3 +2319,139 @@ function handleGetEmployeeMonthlyOvertime(params) {
     return { ok: false, message: error.toString() };
   }
 }
+
+/**
+ * 取得所有公告
+ */
+function handleGetAnnouncements(params) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName('公告');
+    
+    // 如果工作表不存在,建立它
+    if (!sheet) {
+      sheet = ss.insertSheet('公告');
+      sheet.appendRow(['ID', '標題', '內容', '優先級', '建立時間']);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const announcements = [];
+    
+    // 跳過標題列
+    for (let i = 1; i < data.length; i++) {
+      announcements.push({
+        id: data[i][0],
+        title: data[i][1],
+        content: data[i][2],
+        priority: data[i][3],
+        createdAt: data[i][4]
+      });
+    }
+    
+    // 按時間排序 (最新在前)
+    announcements.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    return { ok: true, announcements: announcements };
+    
+  } catch (error) {
+    return { ok: false, msg: error.toString() };
+  }
+}
+
+/**
+ * 新增公告 (僅管理員)
+ */
+function handleAddAnnouncement(params) {
+  try {
+    // ✅ 驗證管理員權限
+    const user = getUserByToken(params.token);
+    if (!user || user.dept !== '管理員') {
+      return { ok: false, msg: '無權限' };
+    }
+    
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName('公告');
+    
+    if (!sheet) {
+      sheet = ss.insertSheet('公告');
+      sheet.appendRow(['ID', '標題', '內容', '優先級', '建立時間']);
+    }
+    
+    const id = Date.now().toString();
+    const title = params.title;
+    const content = params.content;
+    const priority = params.priority || 'normal';
+    const createdAt = new Date().toISOString();
+    
+    sheet.appendRow([id, title, content, priority, createdAt]);
+    
+    return {
+      ok: true,
+      announcement: { id, title, content, priority, createdAt }
+    };
+    
+  } catch (error) {
+    return { ok: false, msg: error.toString() };
+  }
+}
+/**
+ * 刪除公告 (僅管理員) - 修正版
+ */
+function handleDeleteAnnouncement(params) {
+  try {
+    Logger.log('═══════════════════════════════════════');
+    Logger.log('🗑️ 開始刪除公告');
+    Logger.log('   收到的 ID: ' + params.id);
+    Logger.log('   ID 型別: ' + typeof params.id);
+    
+    const user = getUserByToken(params.token);
+    if (!user || user.dept !== '管理員') {
+      Logger.log('❌ 無權限');
+      return { ok: false, msg: '無權限' };
+    }
+    
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('公告');
+    
+    if (!sheet) {
+      Logger.log('❌ 工作表不存在');
+      return { ok: false, msg: '工作表不存在' };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const announcementId = String(params.id);  // ⭐⭐⭐ 強制轉為字串
+    
+    Logger.log('   轉換後的 ID: ' + announcementId);
+    Logger.log('   工作表總行數: ' + data.length);
+    Logger.log('');
+    
+    // 找到對應的列
+    for (let i = 1; i < data.length; i++) {
+      const rowId = String(data[i][0]);  // ⭐⭐⭐ 也轉為字串
+      
+      Logger.log(`   檢查第 ${i + 1} 行: ID = "${rowId}"`);
+      
+      if (rowId === announcementId) {
+        Logger.log(`   ✅ 找到匹配！刪除第 ${i + 1} 行`);
+        sheet.deleteRow(i + 1);
+        Logger.log('═══════════════════════════════════════');
+        return { ok: true, msg: '公告已刪除' };
+      }
+    }
+    
+    Logger.log('   ❌ 沒有找到匹配的 ID');
+    Logger.log('');
+    Logger.log('📋 工作表中所有的 ID:');
+    for (let i = 1; i < data.length; i++) {
+      Logger.log(`   - "${data[i][0]}" (${typeof data[i][0]})`);
+    }
+    Logger.log('═══════════════════════════════════════');
+    
+    return { ok: false, msg: '找不到公告' };
+    
+  } catch (error) {
+    Logger.log('❌ 錯誤: ' + error);
+    Logger.log('═══════════════════════════════════════');
+    return { ok: false, msg: error.toString() };
+  }
+}
