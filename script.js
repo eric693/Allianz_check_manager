@@ -2897,16 +2897,6 @@ function clearShiftCache() {
 }
 
 // ==================== 📢 佈告欄功能 ====================
-
-function  loadAnnouncements() {
-    const data = localStorage.getItem('announcements');
-    return data ? JSON.parse(data) : [];
-}
-
-function saveAnnouncements(announcements) {
-    localStorage.setItem('announcements', JSON.stringify(announcements));
-}
-
 function displayAnnouncements() {
     const list = document.getElementById('announcements-list');
     const empty = document.getElementById('announcements-empty');
